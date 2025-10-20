@@ -1,173 +1,744 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
+<!doctype html>
+<html lang="ar" dir="rtl">
+ <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>استعراض شواهد الأداء الوظيفي</title>
+  <title>عناصر تقييم الأداء الوظيفي</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Arial', sans-serif; direction: rtl; margin: 0; background: #f5f7fa; }
-    header { background: linear-gradient(90deg, #6a11cb, #2575fc); color: white; padding: 20px; text-align: center; }
-    h1 { margin: 0; font-size: 26px; }
-    header p { font-size: 18px; margin-top: 5px; font-weight: bold; }
-    .filter { text-align: center; margin: 15px; }
-    .filter select { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
-    .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
-    .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 15px; display: flex; flex-direction: column; }
-    .card h3 { margin: 10px 0 5px 0; font-size: 18px; color: #333; }
-    .card p { font-size: 14px; color: #555; margin: 3px 0; }
-    .files { margin-top: 10px; max-height: 200px; overflow-y: auto; }
-    .files label { display: block; margin: 5px 0; cursor: pointer; }
-    .files input[type="checkbox"] { margin-left: 10px; }
-    .card img.preview { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: transform 0.3s; }
-    .card img.preview:hover { transform: scale(1.05); }
-    .footer { text-align: center; margin: 20px; }
-    .footer button { background: #2575fc; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; }
-    .footer button:hover { background: #6a11cb; }
-
-    /* Lightbox styles */
-    #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
-    #lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; }
-    #lightbox span { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>استعراض شواهد الأداء الوظيفي</h1>
-    <p>المعلم: محمد منصور الناشري</p>
-  </header>
-
-  <div class="filter">
-    <label>فلترة حسب نوع الملف:
-      <select id="fileFilter" onchange="applyFilter()">
-        <option value="all">الكل</option>
-        <option value="pdf">PDF</option>
-        <option value="image">صورة</option>
-      </select>
-    </label>
-  </div>
-
-  <div class="container" id="cards-container"></div>
-
-  <div class="footer">
-    <button onclick="printSelected()">طباعة 3 شواهد</button>
-  </div>
-
-  <!-- Lightbox -->
-  <div id="lightbox" onclick="closeLightbox()">
-    <span onclick="closeLightbox()">&times;</span>
-    <img id="lightbox-img" src="">
-  </div>
-
-  <script>
-    const apiUrl = 'https://script.google.com/macros/s/AKfycbwZHLOzuRyZUt-SG2EAo-q3Jp572skexM4HtjFpUo5OgXtZZH5g0_mKgqcY6sv5GU7RJA/exec';
-    let dataStore = {};
-    let selectedFiles = [];
-
-    async function fetchData() {
-      try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        dataStore = data;
-        renderCards(data);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      }
-    }
-
-    function renderCards(data, filter = 'all') {
-      const container = document.getElementById('cards-container');
-      container.innerHTML = '';
-
-      Object.keys(data).forEach(key => {
-        const item = data[key];
-        const card = document.createElement('div');
-        card.classList.add('card');
-
-        // صورة معاينة
-        let previewUrl = '';
-        const firstFile = item.files[0];
-        if(firstFile && firstFile.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-          previewUrl = firstFile.url;
-        } else {
-          previewUrl = 'https://via.placeholder.com/250x150.png?text=Preview';
+        body {
+            box-sizing: border-box;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100%;
+            position: relative;
         }
 
-        // ملفات مع فلترة
-        let filesHtml = '';
-        item.files.forEach(file => {
-          const type = getFileType(file.name);
-          if(filter === 'all' || filter === type) {
-            filesHtml += `
-              <label>
-                <input type="checkbox" value="${file.url}" onclick="toggleSelection('${file.url}')">
-                ${file.name}
-                ${type==='image' ? '<button onclick="showLightbox(event, \''+file.url+'\')">عرض</button>' : ''}
-              </label>
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #ffffff 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, #ffffff 2px, transparent 2px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.15),
+                0 0 0 1px rgba(255,255,255,0.2);
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #3b82f6 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="20" cy="80" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            margin: 0 0 15px 0;
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .teacher-name {
+            font-size: 1.5rem;
+            opacity: 0.95;
+            margin: 0;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+
+        .elements-grid {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .element-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .element-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .element-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.15),
+                0 0 0 1px rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .element-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .element-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .element-number {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-left: 20px;
+            font-size: 1.2rem;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .element-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1e293b;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .element-weight {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .element-examples {
+            margin: 20px 0;
+        }
+
+        .element-examples h4 {
+            color: #475569;
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .examples-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .examples-list li {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            padding: 12px 18px;
+            margin: 8px 0;
+            border-radius: 12px;
+            border-right: 4px solid #3b82f6;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .examples-list li:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .evidence-section {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px dashed #cbd5e1;
+        }
+
+        .evidence-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .evidence-title {
+            color: #475569;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .view-evidence-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .view-evidence-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .evidence-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .evidence-list li {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            padding: 12px 18px;
+            margin: 8px 0;
+            border-radius: 12px;
+            border-right: 4px solid #10b981;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .evidence-list li:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .message-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 25px 35px;
+            border-radius: 15px;
+            z-index: 1000;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            animation: popupShow 0.4s ease;
+            max-width: 400px;
+            word-wrap: break-word;
+        }
+
+        .message-popup.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+        }
+
+        .message-popup.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4);
+        }
+
+        @keyframes popupShow {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .print-section {
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.4);
+        }
+
+        .print-btn:active {
+            transform: translateY(-1px);
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 2cm 1.5cm;
+            }
+            
+            body {
+                background: white !important;
+                padding: 0 !important;
+                font-size: 12pt;
+                line-height: 1.4;
+            }
+            
+            .background-pattern {
+                display: none !important;
+            }
+            
+            .container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                background: white !important;
+                margin: 0 !important;
+                max-width: none !important;
+            }
+            
+            .print-section,
+            .print-btn {
+                display: none !important;
+            }
+            
+            .view-evidence-btn {
+                display: none !important;
+            }
+            
+            .element-card {
+                break-inside: avoid;
+                margin-bottom: 15pt;
+                box-shadow: none !important;
+                border: 1pt solid #e2e8f0 !important;
+                page-break-inside: avoid;
+            }
+            
+            .elements-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15pt !important;
+                padding: 0 !important;
+            }
+            
+            .header {
+                background: #1e3c72 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                page-break-after: avoid;
+            }
+            
+            .header h1 {
+                font-size: 24pt !important;
+            }
+            
+            .header .teacher-name {
+                font-size: 16pt !important;
+            }
+            
+            .element-title {
+                font-size: 14pt !important;
+            }
+            
+            .examples-list li,
+            .evidence-list li {
+                font-size: 11pt !important;
+                margin: 4pt 0 !important;
+                padding: 8pt 12pt !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .elements-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .header .teacher-name {
+                font-size: 1.2rem;
+            }
+            
+            .element-card {
+                padding: 25px;
+            }
+            
+            .container {
+                margin: 10px;
+                border-radius: 20px;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="background-pattern"></div>
+  <div class="container">
+   <div class="header">
+    <h1 id="page-title">عناصر تقييم الأداء الوظيفي</h1>
+    <p class="teacher-name" id="teacher-name">المعلم محمد منصور الناشري</p>
+   </div>
+   <div class="elements-grid" id="elements-grid"><!-- سيتم إنشاء العناصر هنا بواسطة JavaScript -->
+   </div>
+   <div class="print-section"><button class="print-btn" onclick="printPage()"> 🖨️ طباعة الصفحة بتنسيق A4 </button>
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {
+            teacher_name: "المعلم محمد منصور الناشري",
+            page_title: "عناصر تقييم الأداء الوظيفي"
+        };
+
+        const elements = [
+            {
+                number: 1,
+                title: "أداء الواجبات الوظيفية",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1W3MXpOh6ak73yoITVV-jHVMrhGYQ_nMd",
+                examples: [
+                    "التقيد بالدوام الرسمي",
+                    "تأدية الحصص الدراسية وفق الجدول الدراسي",
+                    "المشاركة في الإشراف والمناوبة وحصص الانتظار",
+                    "إعداد ومتابعة الدروس والواجبات والاختبارات"
+                ],
+                evidence: [
+                    "سجل الدوام الرسمي",
+                    "سجل المناوبة والإشراف اليومي",
+                    "سجل الانتظار",
+                    "خطة توزيع المنهج"
+                ]
+            },
+            {
+                number: 2,
+                title: "التفاعل مع المجتمع المهني",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1_k5XJeANbR-Njq_hMM_xQrn7Nct7ZBnL",
+                examples: [
+                    "المشاركة الفاعلة في مجتمعات التعلم المهنية",
+                    "تبادل الزيارات",
+                    "الدروس التطبيقية",
+                    "بحث الدرس",
+                    "حضور الدورات والورش التدريبية"
+                ],
+                evidence: [
+                    "سجل مجتمعات التعلم المهنية",
+                    "سجل تبادل الزيارات",
+                    "تقرير تنفيذ درس تطبيقي",
+                    "شهادات حضور الدورات والورش التدريبية"
+                ]
+            },
+            {
+                number: 3,
+                title: "التفاعل مع أولياء الأمور",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1gK4MKxGUjo0wPd7o1BATBt6TKPypRTgc",
+                examples: [
+                    "التواصل الفعال مع أولياء الأمور بالتنسيق مع الموجه الطلابي",
+                    "تزويد أولياء الأمور بمستويات الطلاب",
+                    "إيصال الملاحظات الهامة لأولياء الأمور",
+                    "تفعيل الخطة الأسبوعية للمدرسة",
+                    "المشاركة الفاعلة في الجمعية العمومية للمعلمين وأولياء الأمور"
+                ],
+                evidence: [
+                    "صور من الجمعية العمومية لأولياء الأمور والمعلمين",
+                    "تقرير اجتماع ولي الأمر مع المعلم",
+                    "نسخة من الخطة الأسبوعية للمدرسة"
+                ]
+            },
+            {
+                number: 4,
+                title: "التنويع في استراتيجيات التدريس",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1KRoRyUl4Ul84np4jezaWJL0e6bGrhL2W",
+                examples: [
+                    "استخدام استراتيجيات متنوعة تناسب مستويات الطلاب",
+                    "مراعاة الفروق الفردية"
+                ],
+                evidence: [
+                    "تقرير عن تطبيق استراتيجية",
+                    "ملف إنجاز المعلم"
+                ]
+            },
+            {
+                number: 5,
+                title: "تحسين نتائج المتعلمين",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/16ZGJwU5R4TinbuDRqaWj19Z8ZQphtS-5",
+                examples: [
+                    "معالجة الفاقد التعليمي",
+                    "وضع الخطط العلاجية للطلاب الضعاف",
+                    "وضع الخطط الإثرائية للطلاب المتميزين",
+                    "تكريم الطلاب المتميزين والذين تحسن مستواهم"
+                ],
+                evidence: [
+                    "نتائج الاختبار القبلي والبعدي",
+                    "كشف متابعة الطلاب"
+                ]
+            },
+            {
+                number: 6,
+                title: "إعداد وتنفيذ خطة التعلم",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1qsYvVaQQl31t0JTPjw0aPUo034-YcIyM",
+                examples: [
+                    "توزيع المنهج وإعداد الدروس",
+                    "إعداد الواجبات والاختبارات",
+                    "تنفيذ الدروس"
+                ],
+                evidence: [
+                    "خطة توزيع المنهج",
+                    "نموذج من إعداد الدروس",
+                    "نماذج من الواجبات والاختبارات"
+                ]
+            },
+            {
+                number: 7,
+                title: "توظيف تقنيات ووسائل التعلم المناسبة",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1x1SuN8TRPQ2uPmNfyvbA4EvAugeWLMxY",
+                examples: [
+                    "دمج التقنية في التعليم",
+                    "التنويع في الوسائل التعليمية"
+                ],
+                evidence: [
+                    "صور من الوسائل التعليمية المستخدمة",
+                    "تقرير عن برنامج تقني تم استخدامه"
+                ]
+            },
+            {
+                number: 8,
+                title: "تهيئة البيئة التعليمية",
+                weight: "5%",
+                driveLink: "https://drive.google.com/drive/folders/1zfdCJrzzQibwcnuVQ5XhgK51A_OgdU1f",
+                examples: [
+                    "مراعاة حاجات الطلاب",
+                    "التهيئة النفسية للطلاب",
+                    "التحفيز المادي والمعنوي",
+                    "توفير متطلبات الدرس"
+                ],
+                evidence: [
+                    "تقرير تصنيف الطلاب وفق أنماط التعلم",
+                    "نماذج من التحفيز المادي والمعنوي"
+                ]
+            },
+            {
+                number: 9,
+                title: "الإدارة الصفية",
+                weight: "5%",
+                driveLink: "https://drive.google.com/drive/folders/1x38roYL9AfbjHFVdL9ir0SF-lF8PkDS1",
+                examples: [
+                    "ضبط سلوك الطلاب",
+                    "شد انتباه الطلاب",
+                    "مراعاة الفروق الفردية",
+                    "متابعة الحضور والغياب والتأخر"
+                ],
+                evidence: [
+                    "كشف المتابعة",
+                    "تطبيق إدارة الصف"
+                ]
+            },
+            {
+                number: 10,
+                title: "تحليل نتائج المتعلمين وتشخيص مستوياتهم",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1i9NpHGPmKyBHc1I8kpMV7dX4Dl955MzN",
+                examples: [
+                    "تحليل نتائج الاختبارات الفترية والنهائية",
+                    "تصنيف الطلاب وفق نتائجهم",
+                    "معالجة الفاقد التعليمي",
+                    "تحديد نقاط القوة والضعف"
+                ],
+                evidence: [
+                    "تقرير تحليل نتائج الطلاب",
+                    "سجل معالجة الفاقد التعليمي"
+                ]
+            },
+            {
+                number: 11,
+                title: "تنويع أساليب التقويم",
+                weight: "10%",
+                driveLink: "https://drive.google.com/drive/folders/1H69lblJXjM1WZSzd4AjvrIT8gLm7Yhbg",
+                examples: [
+                    "تطبيق الاختبارات الورقية والإلكترونية",
+                    "المشاريع الطلابية",
+                    "المهام الأدائية",
+                    "ملفات إنجاز الطلاب"
+                ],
+                evidence: [
+                    "نماذج من الاختبارات",
+                    "نماذج من ملفات إنجاز الطلاب",
+                    "نماذج من المهام الأدائية ومشاريع الطلاب"
+                ]
+            }
+        ];
+
+        function createElementCard(element) {
+            return `
+                <div class="element-card">
+                    <div class="element-header">
+                        <div class="element-number">${element.number}</div>
+                        <div class="element-title">${element.title}</div>
+                        <div class="element-weight">${element.weight}</div>
+                    </div>
+                    
+                    <div class="element-examples">
+                        <h4>🔸 أمثلة على تحقق العنصر:</h4>
+                        <ul class="examples-list">
+                            ${element.examples.map(example => `<li>${example}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="evidence-section">
+                        <div class="evidence-header">
+                            <div class="evidence-title">🔸 الشواهد:</div>
+                            <button class="view-evidence-btn" onclick="toggleEvidenceViewer(${element.number})">
+                                عرض الشواهد
+                            </button>
+                        </div>
+                        
+                        <ul class="evidence-list">
+                            ${element.evidence.map(evidence => `<li>${evidence}</li>`).join('')}
+                        </ul>
+                        
+
+                    </div>
+                </div>
             `;
-          }
+        }
+
+        function toggleEvidenceViewer(elementNumber) {
+            const element = elements.find(el => el.number === elementNumber);
+            const driveLink = element ? element.driveLink : '';
+            
+            if (!driveLink) {
+                showMessage('لم يتم العثور على رابط مجلد Google Drive لهذا العنصر', 'error');
+                return;
+            }
+            
+            // فتح الرابط في نافذة جديدة
+            window.open(driveLink, '_blank', 'noopener,noreferrer');
+            
+            // إظهار رسالة تأكيد
+            showMessage('تم فتح مجلد الشواهد في نافذة جديدة', 'success');
+        }
+
+        function showMessage(text, type = 'success') {
+            const message = document.createElement('div');
+            message.className = `message-popup ${type}`;
+            message.textContent = text;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                if (document.body.contains(message)) {
+                    document.body.removeChild(message);
+                }
+            }, 3000);
+        }
+
+        function printPage() {
+            // إظهار رسالة تأكيد
+            showMessage('جاري تحضير الصفحة للطباعة بتنسيق A4...', 'success');
+            
+            // بدء الطباعة بعد فترة قصيرة
+            setTimeout(() => {
+                window.print();
+            }, 1500);
+        }
+
+        function renderElements() {
+            const grid = document.getElementById('elements-grid');
+            grid.innerHTML = elements.map(element => createElementCard(element)).join('');
+        }
+
+        async function render(config) {
+            document.getElementById('teacher-name').textContent = config.teacher_name || defaultConfig.teacher_name;
+            document.getElementById('page-title').textContent = config.page_title || defaultConfig.page_title;
+        }
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            renderElements();
+            
+            if (window.elementSdk) {
+                window.elementSdk.init({
+                    defaultConfig,
+                    render,
+                    mapToCapabilities: () => ({
+                        recolorables: [],
+                        borderables: [],
+                        fontEditable: undefined,
+                        fontSizeable: undefined
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ["teacher_name", config.teacher_name || defaultConfig.teacher_name],
+                        ["page_title", config.page_title || defaultConfig.page_title]
+                    ])
+                });
+            }
         });
-
-        card.innerHTML = `
-          <img src="${previewUrl}" class="preview" alt="${item.title}" onclick="firstFileClick(event, '${previewUrl}')">
-          <h3>${item.title}</h3>
-          <p>الوزن: ${item.weight}</p>
-          <p>أمثلة: ${item.examples.join(', ')}</p>
-          <div class="files">${filesHtml}</div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function toggleSelection(fileUrl) {
-      const index = selectedFiles.indexOf(fileUrl);
-      if(index === -1) selectedFiles.push(fileUrl);
-      else selectedFiles.splice(index,1);
-    }
-
-    function getFileType(filename) {
-      if(filename.match(/\.(pdf)$/i)) return 'pdf';
-      if(filename.match(/\.(jpg|jpeg|png|gif)$/i)) return 'image';
-      return 'other';
-    }
-
-    function applyFilter() {
-      const filter = document.getElementById('fileFilter').value;
-      renderCards(dataStore, filter);
-    }
-
-    function printSelected() {
-      if(selectedFiles.length !== 3) {
-        alert('يرجى اختيار 3 شواهد فقط للطباعة.');
-        return;
-      }
-      const printWindow = window.open('', '', 'width=800,height=600');
-      printWindow.document.write('<html><head><title>طباعة الشواهد</title>');
-      printWindow.document.write('<style>body{font-family:Arial;direction:rtl;margin:20px;}p{margin:10px 0;} a{text-decoration:none;color:#2575fc;}</style>');
-      printWindow.document.write('</head><body>');
-      selectedFiles.forEach(url => {
-        printWindow.document.write(`<p><a href="${url}" target="_blank">${url}</a></p>`);
-      });
-      printWindow.document.close();
-      printWindow.print();
-    }
-
-    function showLightbox(event, url) {
-      event.stopPropagation();
-      document.getElementById('lightbox').style.display = 'flex';
-      document.getElementById('lightbox-img').src = url;
-    }
-
-    function closeLightbox() {
-      document.getElementById('lightbox').style.display = 'none';
-    }
-
-    function firstFileClick(event, url) {
-      if(url !== 'https://via.placeholder.com/250x150.png?text=Preview'){
-        showLightbox(event, url);
-      }
-    }
-
-    fetchData();
-  </script>
-</body>
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c532a0636f445',t:'MTc2MTAwMzI1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
