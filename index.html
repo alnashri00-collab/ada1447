@@ -91,20 +91,21 @@
         }
 
         .element-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            background: #ffffff;
             border-radius: 20px;
             padding: 30px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
             /* إصلاح مشكلة الرمشة */
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
             will-change: transform;
+            contain: layout style paint;
         }
 
         .element-card::before {
@@ -120,11 +121,9 @@
         }
 
         .element-card:hover {
-            transform: translateY(-8px) scale(1.02) translateZ(0);
-            box-shadow: 
-                0 25px 50px rgba(0,0,0,0.15),
-                0 0 0 1px rgba(59, 130, 246, 0.1);
-            border-color: rgba(59, 130, 246, 0.3);
+            transform: translate3d(0, -5px, 0);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
         }
 
         .element-card:hover::before {
@@ -190,19 +189,19 @@
         }
 
         .examples-list li {
-            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            background: #f8fafc;
             padding: 12px 18px;
             margin: 8px 0;
             border-radius: 12px;
             border-right: 4px solid #3b82f6;
             font-size: 0.95rem;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             position: relative;
         }
 
         .examples-list li:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            transform: translateX(-3px);
+            box-shadow: 0 3px 8px rgba(59, 130, 246, 0.15);
         }
 
         .evidence-section {
@@ -251,18 +250,18 @@
         }
 
         .evidence-list li {
-            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            background: #f0fdf4;
             padding: 12px 18px;
             margin: 8px 0;
             border-radius: 12px;
             border-right: 4px solid #10b981;
             font-size: 0.95rem;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .evidence-list li:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            transform: translateX(-3px);
+            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.15);
         }
 
         .print-section {
@@ -301,26 +300,28 @@
         .print-header {
             display: none;
             position: fixed;
-            top: 1cm;
-            left: 2cm;
-            right: 2cm;
+            top: 0.5cm;
+            left: 1.5cm;
+            right: 1.5cm;
             text-align: center;
-            background: rgba(16, 185, 129, 0.1);
-            padding: 15pt 25pt;
-            border-radius: 15pt;
-            border: 3pt solid #10b981;
+            background: rgba(16, 185, 129, 0.15);
+            padding: 12pt 20pt;
+            border-radius: 12pt;
+            border: 2pt solid #10b981;
             font-family: 'Cairo', sans-serif;
-            font-size: 18pt;
+            font-size: 16pt;
             font-weight: 700;
             color: #1e3c72;
             z-index: 1000;
-            box-shadow: 0 4pt 12pt rgba(16, 185, 129, 0.3);
+            box-shadow: 0 3pt 8pt rgba(16, 185, 129, 0.25);
+            height: 1.2cm;
+            box-sizing: border-box;
         }
 
         @media print {
             @page {
                 size: A4;
-                margin: 4cm 2cm 2cm 2cm;
+                margin: 3cm 2cm 2cm 2cm;
             }
             
             body {
@@ -347,10 +348,10 @@
             .print-header {
                 display: block !important;
                 position: fixed !important;
-                top: 1cm !important;
-                left: 2cm !important;
-                right: 2cm !important;
-                background: rgba(16, 185, 129, 0.1) !important;
+                top: 0.3cm !important;
+                left: 1.5cm !important;
+                right: 1.5cm !important;
+                background: rgba(16, 185, 129, 0.15) !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -365,7 +366,7 @@
                 background: white !important;
                 margin: 0 !important;
                 max-width: none !important;
-                padding-top: 2cm !important;
+                padding-top: 1.5cm !important;
             }
             
             .print-section,
@@ -418,23 +419,24 @@
                 print-color-adjust: exact !important;
             }
             
-            .examples-list li,
-            .evidence-list li {
+            .examples-list li {
                 font-size: 12pt !important;
                 margin: 8pt 0 !important;
                 padding: 12pt 18pt !important;
-                background: rgba(241, 245, 249, 0.9) !important;
+                background: #f8fafc !important;
+                border-right: 4pt solid #3b82f6 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
             
-            .examples-list li {
-                border-right: 4pt solid #3b82f6 !important;
-            }
-            
             .evidence-list li {
+                font-size: 12pt !important;
+                margin: 8pt 0 !important;
+                padding: 12pt 18pt !important;
+                background: #f0fdf4 !important;
                 border-right: 4pt solid #10b981 !important;
-                background: rgba(236, 253, 245, 0.9) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             
             .element-examples h4,
@@ -766,5 +768,5 @@
             }
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c635d609ef445',t:'MTc2MTAwMzkxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c6b3277f5f445',t:'MTc2MTAwNDIzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
