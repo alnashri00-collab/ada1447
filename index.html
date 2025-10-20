@@ -1,29 +1,173 @@
-
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تقييم الأداء الوظيفي</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استعراض شواهد الأداء الوظيفي</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; direction: rtl; margin: 0; background: #f5f7fa; }
+    header { background: linear-gradient(90deg, #6a11cb, #2575fc); color: white; padding: 20px; text-align: center; }
+    h1 { margin: 0; font-size: 26px; }
+    header p { font-size: 18px; margin-top: 5px; font-weight: bold; }
+    .filter { text-align: center; margin: 15px; }
+    .filter select { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 15px; display: flex; flex-direction: column; }
+    .card h3 { margin: 10px 0 5px 0; font-size: 18px; color: #333; }
+    .card p { font-size: 14px; color: #555; margin: 3px 0; }
+    .files { margin-top: 10px; max-height: 200px; overflow-y: auto; }
+    .files label { display: block; margin: 5px 0; cursor: pointer; }
+    .files input[type="checkbox"] { margin-left: 10px; }
+    .card img.preview { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: transform 0.3s; }
+    .card img.preview:hover { transform: scale(1.05); }
+    .footer { text-align: center; margin: 20px; }
+    .footer button { background: #2575fc; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    .footer button:hover { background: #6a11cb; }
+
+    /* Lightbox styles */
+    #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+    #lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; }
+    #lightbox span { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; }
+  </style>
 </head>
 <body>
-<header>
-  <h1>عناصر تقييم الأداء الوظيفي - المعلم محمد منصور الناشري</h1>
-</header>
+  <header>
+    <h1>استعراض شواهد الأداء الوظيفي</h1>
+    <p>المعلم: محمد منصور الناشري</p>
+  </header>
 
-<main id="container">
-  <!-- البطاقات سيتم إنشاؤها ديناميكيًا بواسطة script.js -->
-</main>
+  <div class="filter">
+    <label>فلترة حسب نوع الملف:
+      <select id="fileFilter" onchange="applyFilter()">
+        <option value="all">الكل</option>
+        <option value="pdf">PDF</option>
+        <option value="image">صورة</option>
+      </select>
+    </label>
+  </div>
 
-<button id="printBtn">طباعة الشواهد المختارة</button>
+  <div class="container" id="cards-container"></div>
 
-<!-- Lightbox للشواهد -->
-<div id="lightbox" class="lightbox">
-  <span class="close">&times;</span>
-  <iframe id="lightboxFrame" src="" frameborder="0"></iframe>
-</div>
+  <div class="footer">
+    <button onclick="printSelected()">طباعة 3 شواهد</button>
+  </div>
 
-<script src="script.js"></script>
+  <!-- Lightbox -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <span onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" src="">
+  </div>
+
+  <script>
+    const apiUrl = 'https://script.google.com/macros/s/AKfycbwZHLOzuRyZUt-SG2EAo-q3Jp572skexM4HtjFpUo5OgXtZZH5g0_mKgqcY6sv5GU7RJA/exec';
+    let dataStore = {};
+    let selectedFiles = [];
+
+    async function fetchData() {
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        dataStore = data;
+        renderCards(data);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+
+    function renderCards(data, filter = 'all') {
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      Object.keys(data).forEach(key => {
+        const item = data[key];
+        const card = document.createElement('div');
+        card.classList.add('card');
+
+        // صورة معاينة
+        let previewUrl = '';
+        const firstFile = item.files[0];
+        if(firstFile && firstFile.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+          previewUrl = firstFile.url;
+        } else {
+          previewUrl = 'https://via.placeholder.com/250x150.png?text=Preview';
+        }
+
+        // ملفات مع فلترة
+        let filesHtml = '';
+        item.files.forEach(file => {
+          const type = getFileType(file.name);
+          if(filter === 'all' || filter === type) {
+            filesHtml += `
+              <label>
+                <input type="checkbox" value="${file.url}" onclick="toggleSelection('${file.url}')">
+                ${file.name}
+                ${type==='image' ? '<button onclick="showLightbox(event, \''+file.url+'\')">عرض</button>' : ''}
+              </label>
+            `;
+          }
+        });
+
+        card.innerHTML = `
+          <img src="${previewUrl}" class="preview" alt="${item.title}" onclick="firstFileClick(event, '${previewUrl}')">
+          <h3>${item.title}</h3>
+          <p>الوزن: ${item.weight}</p>
+          <p>أمثلة: ${item.examples.join(', ')}</p>
+          <div class="files">${filesHtml}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function toggleSelection(fileUrl) {
+      const index = selectedFiles.indexOf(fileUrl);
+      if(index === -1) selectedFiles.push(fileUrl);
+      else selectedFiles.splice(index,1);
+    }
+
+    function getFileType(filename) {
+      if(filename.match(/\.(pdf)$/i)) return 'pdf';
+      if(filename.match(/\.(jpg|jpeg|png|gif)$/i)) return 'image';
+      return 'other';
+    }
+
+    function applyFilter() {
+      const filter = document.getElementById('fileFilter').value;
+      renderCards(dataStore, filter);
+    }
+
+    function printSelected() {
+      if(selectedFiles.length !== 3) {
+        alert('يرجى اختيار 3 شواهد فقط للطباعة.');
+        return;
+      }
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write('<html><head><title>طباعة الشواهد</title>');
+      printWindow.document.write('<style>body{font-family:Arial;direction:rtl;margin:20px;}p{margin:10px 0;} a{text-decoration:none;color:#2575fc;}</style>');
+      printWindow.document.write('</head><body>');
+      selectedFiles.forEach(url => {
+        printWindow.document.write(`<p><a href="${url}" target="_blank">${url}</a></p>`);
+      });
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function showLightbox(event, url) {
+      event.stopPropagation();
+      document.getElementById('lightbox').style.display = 'flex';
+      document.getElementById('lightbox-img').src = url;
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').style.display = 'none';
+    }
+
+    function firstFileClick(event, url) {
+      if(url !== 'https://via.placeholder.com/250x150.png?text=Preview'){
+        showLightbox(event, url);
+      }
+    }
+
+    fetchData();
+  </script>
 </body>
 </html>
