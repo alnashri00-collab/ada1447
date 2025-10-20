@@ -99,6 +99,12 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            /* إصلاح مشكلة الرمشة */
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            will-change: transform;
         }
 
         .element-card::before {
@@ -114,7 +120,7 @@
         }
 
         .element-card:hover {
-            transform: translateY(-8px) scale(1.02);
+            transform: translateY(-8px) scale(1.02) translateZ(0);
             box-shadow: 
                 0 25px 50px rgba(0,0,0,0.15),
                 0 0 0 1px rgba(59, 130, 246, 0.1);
@@ -259,45 +265,6 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
         }
 
-        .message-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 25px 35px;
-            border-radius: 15px;
-            z-index: 1000;
-            text-align: center;
-            font-weight: 600;
-            font-size: 1.1rem;
-            animation: popupShow 0.4s ease;
-            max-width: 400px;
-            word-wrap: break-word;
-        }
-
-        .message-popup.success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
-        }
-
-        .message-popup.error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4);
-        }
-
-        @keyframes popupShow {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
         .print-section {
             padding: 40px;
             text-align: center;
@@ -330,10 +297,30 @@
             transform: translateY(-1px);
         }
 
+        /* رأس الطباعة */
+        .print-header {
+            display: none;
+            position: fixed;
+            top: 1cm;
+            left: 2cm;
+            right: 2cm;
+            text-align: center;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 15pt 25pt;
+            border-radius: 15pt;
+            border: 3pt solid #10b981;
+            font-family: 'Cairo', sans-serif;
+            font-size: 18pt;
+            font-weight: 700;
+            color: #1e3c72;
+            z-index: 1000;
+            box-shadow: 0 4pt 12pt rgba(16, 185, 129, 0.3);
+        }
+
         @media print {
             @page {
                 size: A4;
-                margin: 2cm 1.5cm;
+                margin: 4cm 2cm 2cm 2cm;
             }
             
             body {
@@ -341,6 +328,31 @@
                 padding: 0 !important;
                 font-size: 12pt;
                 line-height: 1.4;
+                position: relative;
+            }
+            
+            body::before {
+                content: "";
+                position: fixed;
+                top: 0.5cm;
+                left: 0.5cm;
+                right: 0.5cm;
+                bottom: 0.5cm;
+                border: 4pt solid;
+                border-image: linear-gradient(45deg, #10b981, #059669, #34d399, #10b981) 1;
+                pointer-events: none;
+                z-index: -1;
+            }
+            
+            .print-header {
+                display: block !important;
+                position: fixed !important;
+                top: 1cm !important;
+                left: 2cm !important;
+                right: 2cm !important;
+                background: rgba(16, 185, 129, 0.1) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             
             .background-pattern {
@@ -353,6 +365,7 @@
                 background: white !important;
                 margin: 0 !important;
                 max-width: none !important;
+                padding-top: 2cm !important;
             }
             
             .print-section,
@@ -366,42 +379,69 @@
             
             .element-card {
                 break-inside: avoid;
-                margin-bottom: 15pt;
+                margin-bottom: 25pt;
                 box-shadow: none !important;
-                border: 1pt solid #e2e8f0 !important;
+                border: 2pt solid #e2e8f0 !important;
+                border-radius: 15pt !important;
                 page-break-inside: avoid;
+                background: rgba(248, 250, 252, 0.7) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
             
             .elements-grid {
                 grid-template-columns: 1fr !important;
-                gap: 15pt !important;
-                padding: 0 !important;
+                gap: 25pt !important;
+                padding: 25pt !important;
             }
             
             .header {
-                background: #1e3c72 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                page-break-after: avoid;
-            }
-            
-            .header h1 {
-                font-size: 24pt !important;
-            }
-            
-            .header .teacher-name {
-                font-size: 16pt !important;
+                display: none !important;
             }
             
             .element-title {
-                font-size: 14pt !important;
+                font-size: 16pt !important;
+                color: #1e3c72 !important;
+                font-weight: 700 !important;
+            }
+            
+            .element-number {
+                background: linear-gradient(135deg, #10b981, #059669) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                font-size: 15pt !important;
+            }
+            
+            .element-weight {
+                background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             
             .examples-list li,
             .evidence-list li {
-                font-size: 11pt !important;
-                margin: 4pt 0 !important;
-                padding: 8pt 12pt !important;
+                font-size: 12pt !important;
+                margin: 8pt 0 !important;
+                padding: 12pt 18pt !important;
+                background: rgba(241, 245, 249, 0.9) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .examples-list li {
+                border-right: 4pt solid #3b82f6 !important;
+            }
+            
+            .evidence-list li {
+                border-right: 4pt solid #10b981 !important;
+                background: rgba(236, 253, 245, 0.9) !important;
+            }
+            
+            .element-examples h4,
+            .evidence-title {
+                color: #475569 !important;
+                font-size: 14pt !important;
+                font-weight: 600 !important;
             }
         }
 
@@ -436,6 +476,9 @@
  </head>
  <body>
   <div class="background-pattern"></div>
+  <div class="print-header">
+   شواهد الأداء الوظيفي - المعلم: محمد منصور الناشري
+  </div>
   <div class="container">
    <div class="header">
     <h1 id="page-title">عناصر تقييم الأداء الوظيفي</h1>
@@ -662,8 +705,6 @@
                         <ul class="evidence-list">
                             ${element.evidence.map(evidence => `<li>${evidence}</li>`).join('')}
                         </ul>
-                        
-
                     </div>
                 </div>
             `;
@@ -674,38 +715,16 @@
             const driveLink = element ? element.driveLink : '';
             
             if (!driveLink) {
-                showMessage('لم يتم العثور على رابط مجلد Google Drive لهذا العنصر', 'error');
                 return;
             }
             
             // فتح الرابط في نافذة جديدة
             window.open(driveLink, '_blank', 'noopener,noreferrer');
-            
-            // إظهار رسالة تأكيد
-            showMessage('تم فتح مجلد الشواهد في نافذة جديدة', 'success');
-        }
-
-        function showMessage(text, type = 'success') {
-            const message = document.createElement('div');
-            message.className = `message-popup ${type}`;
-            message.textContent = text;
-            document.body.appendChild(message);
-            
-            setTimeout(() => {
-                if (document.body.contains(message)) {
-                    document.body.removeChild(message);
-                }
-            }, 3000);
         }
 
         function printPage() {
-            // إظهار رسالة تأكيد
-            showMessage('جاري تحضير الصفحة للطباعة بتنسيق A4...', 'success');
-            
-            // بدء الطباعة بعد فترة قصيرة
-            setTimeout(() => {
-                window.print();
-            }, 1500);
+            // بدء الطباعة مباشرة
+            window.print();
         }
 
         function renderElements() {
@@ -716,6 +735,13 @@
         async function render(config) {
             document.getElementById('teacher-name').textContent = config.teacher_name || defaultConfig.teacher_name;
             document.getElementById('page-title').textContent = config.page_title || defaultConfig.page_title;
+            
+            // تحديث رأس الطباعة
+            const printHeader = document.querySelector('.print-header');
+            if (printHeader) {
+                const teacherName = config.teacher_name || defaultConfig.teacher_name;
+                printHeader.textContent = `شواهد الأداء الوظيفي - ${teacherName}`;
+            }
         }
 
         // تهيئة الصفحة
@@ -740,5 +766,5 @@
             }
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c532a0636f445',t:'MTc2MTAwMzI1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c635d609ef445',t:'MTc2MTAwMzkxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
