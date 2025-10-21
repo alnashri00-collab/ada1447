@@ -307,19 +307,7 @@
             box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
         }
 
-        /* رأس الطباعة */
-        .print-header {
-            display: none;
-            position: fixed;
-            top: 0.1cm;
-            right: 0.1cm;
-            text-align: right;
-            font-family: 'Cairo', sans-serif;
-            font-size: 9pt;
-            font-weight: 400;
-            color: #374151;
-            z-index: 1000;
-        }
+        /* رأس الطباعة محذوف */
 
         @media print {
             @page {
@@ -334,15 +322,7 @@
                 line-height: 1.4;
             }
             
-            .print-header {
-                display: block !important;
-                position: fixed !important;
-                top: 0.1cm !important;
-                right: 0.1cm !important;
-                font-size: 9pt !important;
-                font-weight: 400 !important;
-                color: #374151 !important;
-            }
+
             
             .container {
                 box-shadow: none !important;
@@ -457,9 +437,6 @@
  </head>
  <body>
   <div class="background-pattern"></div>
-  <div class="print-header">
-   شواهد الأداء الوظيفي - المعلم: محمد منصور الناشري
-  </div>
   <div class="container">
    <div class="header">
     <h1 id="page-title">عناصر تقييم الأداء الوظيفي</h1>
@@ -717,12 +694,7 @@
             document.getElementById('teacher-name').textContent = config.teacher_name || defaultConfig.teacher_name;
             document.getElementById('page-title').textContent = config.page_title || defaultConfig.page_title;
             
-            // تحديث رأس الطباعة
-            const printHeader = document.querySelector('.print-header');
-            if (printHeader) {
-                const teacherName = config.teacher_name || defaultConfig.teacher_name;
-                printHeader.textContent = `شواهد الأداء الوظيفي - ${teacherName}`;
-            }
+
         }
 
         // تهيئة الصفحة
@@ -747,5 +719,5 @@
             }
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c8200841af445',t:'MTc2MTAwNTE3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c89f0548bf445',t:'MTc2MTAwNTQ5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
